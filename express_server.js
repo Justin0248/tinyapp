@@ -10,13 +10,29 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-function generateRandomString() {}
+const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
+
+function generateRandomString() {
+  let output = ''
+for (let i = 0; i < 6; i++) {
+output += characters.charAt(Math.floor(Math.random() * characters.length))
+}
+return output;
+}
 
 app.use(express.urlencoded({ extended: true }));
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  const longURL = req.body.longURL;
+  const shortURL = generateRandomString();
+  urlDatabase[shortURL] = longURL; 
+  res.redirect(`/urls/${shortURL}`);
+});
+
+app.get("/u/:id", (req, res) => {
+  const url = req.params.id
+   const longURL = urlDatabase[url];
+  res.redirect(longURL);
 });
 
 app.get('/urls', (req, res) => {
