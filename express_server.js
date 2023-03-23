@@ -29,11 +29,18 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
+app.post("/urls/:id/delete", (req, res) => {
+  const id = req.params.id;
+delete urlDatabase[id];
+res.redirect("/urls");
+});
+
 app.get("/u/:id", (req, res) => {
   const url = req.params.id
    const longURL = urlDatabase[url];
   res.redirect(longURL);
 });
+
 
 app.get('/urls', (req, res) => {
     const templateVars = { urls: urlDatabase };
