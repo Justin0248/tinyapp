@@ -22,11 +22,29 @@ return output;
 
 app.use(express.urlencoded({ extended: true }));
 
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+
 app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = longURL; 
   res.redirect(`/urls/${shortURL}`);
+});
+
+app.post("/urls/:id/edit", (req, res) => {
+  const id = req.params.id;
+  const longURL = req.body.longURL;
+  urlDatabase[id] = longURL;
+  res.redirect(`/urls/${id}`);
+});
+
+
+
+app.post("/urls/:id/edit", (req, res) => {
+  let shortURL = req.params.id;
+  res.redirect(`/urls/${req.params.id}`);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
@@ -55,9 +73,7 @@ app.get("/urls.json", (req, res) => {
     res.json(urlDatabase);
   });
 
-  app.get("/urls/new", (req, res) => {
-    res.render("urls_new");
-  });
+
 
   app.get("/urls/:id", (req, res) => {
     const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
