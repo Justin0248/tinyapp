@@ -27,6 +27,13 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
+ let username = req.body.username
+ console.log(username);
+  res.cookie('_header', username);
+  res.redirect("/urls");
+});
+
+app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = longURL; 
