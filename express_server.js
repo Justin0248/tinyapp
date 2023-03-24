@@ -36,15 +36,10 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:id/edit", (req, res) => {
   const id = req.params.id;
   const longURL = req.body.longURL;
+  if (longURL){
   urlDatabase[id] = longURL;
+  }
   res.redirect(`/urls/${id}`);
-});
-
-
-
-app.post("/urls/:id/edit", (req, res) => {
-  let shortURL = req.params.id;
-  res.redirect(`/urls/${req.params.id}`);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
