@@ -53,18 +53,24 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { 
     urls: urlDatabase,
     shortURL,
-     longURL,
-      username: req.cookies["username"]
+    longURL,
+    username: req.cookies["username"]
     };
   res.render("urls_show", templateVars);
 });
 
 
 
-app.post("/urls/:username", (req, res) => {
- let username = req.body.username
+app.post("/urls", (req, res) => {
+ let username = req.body["username"]
   res.cookie('username', username);
   res.redirect("/urls");
+});
+
+app.post("/urls/:username", (req, res) => {
+let username = req.cookies["username"];
+res.clearCookie('username', username);
+res.redirect("/urls");
 });
 
 app.post("/urls", (req, res) => {
