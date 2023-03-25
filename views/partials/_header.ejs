@@ -18,12 +18,12 @@
           <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         </div>
       </div>
-      <form method="POST" action="/urls/<%= email %>">
-        <% if (user) { %>
+
+      <% if (email) { %>
+      <form method="POST" action="/urls">
           <%= email %>
-          <button type="submit">Logout</button>
-        <% } %>
-       
-      </form>
+          <button type="submit" class=" btn btn-primary">Logout</button>
+        </form>
+          <% } %>
     </nav>
   </header>

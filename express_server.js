@@ -11,9 +11,9 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca"
   
 };
-console.log(urlDatabase);
 const users = {
 };
+console.log(users);
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
 
 
@@ -59,7 +59,7 @@ app.post("/registration", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   if (email && password) {
-users.id = {
+users[id] = {
 id,
 email: email,
 password: password
@@ -71,22 +71,17 @@ res.redirect("/urls");
 });
 
 
-//lets user sign in/up using username
-// app.post("/urls", (req, res) => {
-//  let username = req.body["username"]
-//  if (username) {
-//   res.cookie('username', username);
-//   res.redirect("/urls");
-//  }
-// });
-
-
-//lets user logout
-app.post("/urls/:email", (req, res) => {
-let id = req.cookies["email"];
-res.clearCookie('email', email);
-res.redirect("/urls");
+// lets user sign in/up using username
+app.post("/urls", (req, res) => {
+ let email = req.cookies["email"]
+ if (email) {
+  res.clearCookie('email', email);
+  res.redirect("/urls");
+ }
 });
+
+
+
 
 
 //lets user delete a url from the home page
@@ -133,7 +128,7 @@ app.get("/urls", (req, res) => {
 
 //gives user registration page
 app.get("/registration", (req, res) => {
-const templateVars = {
+  const templateVars = {
   user: users,
   url: urlDatabase,
   email: req.cookies['email']
@@ -172,4 +167,4 @@ app.get("/urls.json", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
-});
+}); 
