@@ -13,7 +13,7 @@ const urlDatabase = {
 };
 const users = {
 };
-console.log(users);
+
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
 
 
@@ -54,11 +54,22 @@ app.post("/urls/:id/edit", (req, res) => {
 });
 
 
+//registration page
 app.post("/registration", (req, res) => {
   let id = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
-  if (email && password) {
+  for (const keys in users) {
+    for (const key in users[keys]) {
+if (users[keys][key] === users[keys][key]) {
+  res.status(400).send('Error, Email already taken')
+}
+  }
+}
+  if (!email || !password) {
+    res.status(400).send('Error, insufficient information provided')
+  }
+  else if (email && password) {
 users[id] = {
 id,
 email: email,
@@ -66,12 +77,13 @@ password: password
 }
 res.cookie('email', email);
 res.redirect("/urls");
-
 }
+
+console.log(users);
 });
 
 
-// lets user sign in/up using username
+// logout function
 app.post("/urls", (req, res) => {
  let email = req.cookies["email"]
  if (email) {
@@ -79,9 +91,6 @@ app.post("/urls", (req, res) => {
   res.redirect("/urls");
  }
 });
-
-
-
 
 
 //lets user delete a url from the home page
