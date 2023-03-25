@@ -60,7 +60,7 @@ const email = req.body.email
 const password = req.body.password
   for (const keys in users) {
       if(users[keys].email !== email || users[keys].password !== password) {
-        res.status(400).send('Error, wrong information provided')
+        res.status(403).send('Error, wrong information provided')
       }
       else if (users[keys].email === email && users[keys].password === password) {
         res.cookie('email', email)
