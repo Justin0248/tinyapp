@@ -54,20 +54,37 @@ app.post("/urls/:id/edit", (req, res) => {
 });
 
 
-//lets user sign in/up using username
-app.post("/urls", (req, res) => {
- let username = req.body["username"]
- if (username) {
-  res.cookie('username', username);
-  res.redirect("/urls");
- }
+app.post("/registration", (req, res) => {
+  let id = generateRandomString();
+  const email = req.body.email;
+  const password = req.body.password;
+  if (email && password) {
+users.id = {
+id,
+email: email,
+password: password
+}
+res.cookie('email', email);
+res.redirect("/urls");
+
+}
 });
 
 
+//lets user sign in/up using username
+// app.post("/urls", (req, res) => {
+//  let username = req.body["username"]
+//  if (username) {
+//   res.cookie('username', username);
+//   res.redirect("/urls");
+//  }
+// });
+
+
 //lets user logout
-app.post("/urls/:username", (req, res) => {
-let username = req.cookies["username"];
-res.clearCookie('username', username);
+app.post("/urls/:email", (req, res) => {
+let id = req.cookies["email"];
+res.clearCookie('email', email);
 res.redirect("/urls");
 });
 
@@ -83,8 +100,9 @@ res.redirect("/urls");
 //shows username in create new url header
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
-    urls: urlDatabase
+    user: users,
+    urls: urlDatabase,
+    email: req.cookies['email']
   }
   res.render("urls_new", templateVars);
 });
@@ -95,7 +113,8 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = { 
     id: req.params.id, 
     longURL: urlDatabase[req.params.id],
-    username: req.cookies["username"]
+    user: users,
+    email: req.cookies['email']
   };
   res.render("urls_show", templateVars);
 });
@@ -105,7 +124,8 @@ app.get("/urls/:id", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"]
+    user: users,
+    email: req.cookies['email']
   };
   res.render("urls_index", templateVars);
 });
@@ -114,8 +134,10 @@ app.get("/urls", (req, res) => {
 //gives user registration page
 app.get("/registration", (req, res) => {
 const templateVars = {
-  username: req.cookies["username"]
-}
+  user: users,
+  url: urlDatabase,
+  email: req.cookies['email']
+};
   res.render("urls_register", templateVars)
 });
 
