@@ -25,5 +25,9 @@
           <button type="submit" class=" btn btn-primary">Logout</button>
         </form>
           <% } %>
+         <% if (!email) { %>
+          <a class="nav-item nav-link" href="/registration">Register</a>
+          <a class="nav-item nav-link" href="/login">Login</a>
+          <% } %>
     </nav>
   </header>

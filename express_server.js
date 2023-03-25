@@ -54,6 +54,22 @@ app.post("/urls/:id/edit", (req, res) => {
 });
 
 
+//login page
+app.post('/login', (req, res) => {
+const email = req.body.email
+const password = req.body.password
+  for (const keys in users) {
+      if(users[keys].email !== email || users[keys].password !== password) {
+        res.status(400).send('Error, wrong information provided')
+      }
+      else if (users[keys].email === email && users[keys].password === password) {
+        res.cookie('email', email)
+        res.redirect("/urls");
+      }
+    }
+});
+
+
 //registration page
 app.post("/registration", (req, res) => {
   let id = generateRandomString();
@@ -76,6 +92,7 @@ email: email,
 password: password
 }
 res.cookie('email', email);
+res.cookie('password', password);
 res.redirect("/urls");
 }
 
@@ -132,6 +149,18 @@ app.get("/urls", (req, res) => {
     email: req.cookies['email']
   };
   res.render("urls_index", templateVars);
+});
+
+
+app.get("/login", (req, res) => {
+const templateVars = {
+    user: users,
+    url: urlDatabase,
+    email: req.cookies['email'],
+    password: req.cookies['password']
+};
+
+  res.render("urls_login", templateVars)
 });
 
 
