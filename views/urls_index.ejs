@@ -36,7 +36,6 @@
               <% if (ids !== 'userID') { %>
               <td><%= id %></td>
               <td><%= urls[id][ids] %></td>
-              <td><%= urls[id].userID %></td>
               <td> <form method="POST" action="/urls/<%= id %>/edit"><button type="submit">Edit</button></form></td>
               <td> <form method="POST" action="/urls/<%= id %>/delete"><button type="submit">Delete</button></form></td>
             </tr>
