@@ -7,9 +7,7 @@ app.set('view engine', 'ejs');
 app.use(cookieParser());
 
 const urlDatabase = {
-  "9sm5xK": "http://www.google.com",
-  "b2xVn2": "http://www.lighthouselabs.ca"
-  
+
 };
 const users = {
 };
@@ -31,13 +29,70 @@ app.use(express.urlencoded({ extended: true }));
 
 
 
+
+
+
+//login page
+app.post('/login', (req, res) => {
+  const email = req.body.email
+  const password = req.body.password
+    for (const keys in users) {
+        if(users[keys].email !== email || users[keys].password !== password) {
+          res.status(403).send('Error, wrong information provided')
+        }
+        else if (users[keys].email === email && users[keys].password === password) {
+          res.cookie('email', email);
+          res.cookie('password', password);
+          res.cookie('id', id)
+          res.redirect("/urls");
+        }
+      }
+  });
+  
+  
+  //registration page
+  app.post("/registration", (req, res) => {
+    let id = generateRandomString();
+    const email = req.body.email;
+    const password = req.body.password;
+    for (const keys in users) {
+      for (const key in users[keys]) {
+  if (users[keys][key] === email) {
+    res.status(400).send('Error, Email already taken')
+  }
+    }
+  }
+    if (!email || !password) {
+      res.status(400).send('Error, insufficient information provided')
+    }
+    else if (email && password) {
+  users[id] = {
+  id,
+  email: email,
+  password: password
+  }
+  console.log(users);
+  res.cookie('email', email);
+  res.cookie('password', password);
+  res.cookie('id', id);
+  res.redirect("/urls");
+  }
+
+  });
+
+
 //generates a random short url to associate 
 //with the created url and adds it to home page
 app.post("/urls/new", (req, res) => {
   const longURL = req.body.longURL;
+  userid = req.cookies['id']
   if (longURL) {
     const id = generateRandomString();
-    urlDatabase[id] = longURL; 
+    urlDatabase[id] = { 
+      longURL: longURL,
+    userID: userid,
+    };
+    console.log(urlDatabase);
     res.redirect(`/urls`);
   }
 });
@@ -54,57 +109,15 @@ app.post("/urls/:id/edit", (req, res) => {
 });
 
 
-//login page
-app.post('/login', (req, res) => {
-const email = req.body.email
-const password = req.body.password
-  for (const keys in users) {
-      if(users[keys].email !== email || users[keys].password !== password) {
-        res.status(403).send('Error, wrong information provided')
-      }
-      else if (users[keys].email === email && users[keys].password === password) {
-        res.cookie('email', email)
-        res.redirect("/urls");
-      }
-    }
-});
-
-
-//registration page
-app.post("/registration", (req, res) => {
-  let id = generateRandomString();
-  const email = req.body.email;
-  const password = req.body.password;
-  for (const keys in users) {
-    for (const key in users[keys]) {
-if (users[keys][key] === users[keys][key]) {
-  res.status(400).send('Error, Email already taken')
-}
-  }
-}
-  if (!email || !password) {
-    res.status(400).send('Error, insufficient information provided')
-  }
-  else if (email && password) {
-users[id] = {
-id,
-email: email,
-password: password
-}
-res.cookie('email', email);
-res.cookie('password', password);
-res.redirect("/urls");
-}
-
-console.log(users);
-});
-
-
 // logout function
 app.post("/urls", (req, res) => {
- let email = req.cookies["email"]
+ let email = req.cookies["email"];
+ let password = req.cookies['password'];
+ let id = req.cookies['id'];
  if (email) {
   res.clearCookie('email', email);
+  res.clearCookie('password', password);
+  res.clearCookie('id', id)
   res.redirect("/urls");
  }
 });

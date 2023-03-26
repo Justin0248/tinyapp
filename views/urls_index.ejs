@@ -30,12 +30,16 @@
         </thead>
         <tbody>
           <% for (let id in urls) { %>
+            <% for (let ids in urls[id]) { %>
             <tr>
+              <% if (ids !== 'userID') { %>
               <td><%= id %></td>
-              <td><%= urls[id] %></td>
+              <td><%= urls[id][ids] %></td>
               <td> <form method="POST" action="/urls/<%= id %>/edit"><button type="submit">Edit</button></form></td>
               <td> <form method="POST" action="/urls/<%= id %>/delete"><button type="submit">Delete</button></form></td>
             </tr>
+          <% } %>
+          <% } %>
           <% } %>
         </tbody>
       </table>
