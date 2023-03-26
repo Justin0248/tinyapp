@@ -1,6 +1,6 @@
 const express = require("express");
 const cookieParser = require('cookie-parser');
-const e = require("express");
+const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -37,17 +37,19 @@ app.use(express.urlencoded({ extended: true }));
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-
+  const hashedPassword = req.cookies['hashedPassword']
+if (bcrypt.compareSync(password, hashedPassword)) {
   for (const keys in users) {
     if (users[keys].email === email && users[keys].password === password) {
       const id = users[keys].id;
       console.log(users);
       res.cookie('email', email);
-      res.cookie('password', password);
+      res.cookie('hashedPassword', hashedPassword);
       res.cookie('id', id);
       res.redirect("/urls");
     }
   }
+}
   res.status(403).send('Error, wrong information provided');
 });
   
@@ -67,6 +69,7 @@ app.post("/registration", (req, res) => {
   if (!email || !password) {
     res.status(400).send('Error, insufficient information provided');
   } else if (email && password) {
+    const hashedPassword = bcrypt.hashSync(password, 10)
     users[id] = {
       id,
       email: email,
@@ -74,7 +77,7 @@ app.post("/registration", (req, res) => {
     };
 
     res.cookie('email', email);
-    res.cookie('password', password);
+    res.cookie('hashedPassword', hashedPassword);
     res.cookie('id', id);
     res.redirect("/urls");
   }
