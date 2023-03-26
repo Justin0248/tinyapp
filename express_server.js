@@ -132,6 +132,7 @@ app.post("/urls", (req, res) => {
 //lets user delete a url from the home page, only if they created the url
 app.post("/urls/:id/delete", (req, res) => {
   const uid = req.session.id;
+  const urls = urlDatabase;
   for (key in urls) {
     if (uid !== urls[key].userID) {
       res.redirect('/urls');
@@ -166,7 +167,6 @@ app.get("/urls/:id", (req, res) => {
   }
   const urls = urlDatabase;
   const uid = req.session.id;
-
   for (key in urls) {
     if (uid !== urls[key].userID) {
       res.redirect('/urls');
