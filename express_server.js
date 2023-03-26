@@ -36,17 +36,18 @@ app.use(express.urlencoded({ extended: true }));
 app.post('/login', (req, res) => {
   const email = req.body.email
   const password = req.body.password
+
     for (const keys in users) {
-        if(users[keys].email !== email || users[keys].password !== password) {
-          res.status(403).send('Error, wrong information provided')
-        }
-        else if (users[keys].email === email && users[keys].password === password) {
-          res.cookie('email', email);
-          res.cookie('password', password);
-          res.cookie('id', id)
-          res.redirect("/urls");
-        }
+      if (users[keys].email === email && users[keys].password === password) {
+        const id = users[keys].id
+        console.log(users)
+        res.cookie('email', email);
+        res.cookie('password', password);
+        res.cookie('id', id);
+        res.redirect("/urls");
+      } 
       }
+      res.status(403).send('Error, wrong information provided')
   });
   
   
@@ -71,7 +72,7 @@ app.post('/login', (req, res) => {
   email: email,
   password: password
   }
-  console.log(users);
+
   res.cookie('email', email);
   res.cookie('password', password);
   res.cookie('id', id);
@@ -85,12 +86,12 @@ app.post('/login', (req, res) => {
 //with the created url and adds it to home page
 app.post("/urls/new", (req, res) => {
   const longURL = req.body.longURL;
-  userid = req.cookies['id']
+  ids = req.cookies['id']
   if (longURL) {
     const id = generateRandomString();
     urlDatabase[id] = { 
       longURL: longURL,
-    userID: userid,
+    userID: ids,
     };
     console.log(urlDatabase);
     res.redirect(`/urls`);
@@ -117,8 +118,7 @@ app.post("/urls", (req, res) => {
  if (email) {
   res.clearCookie('email', email);
   res.clearCookie('password', password);
-  res.clearCookie('id', id)
-  res.redirect("/urls");
+  res.redirect("/login");
  }
 });
 
@@ -168,7 +168,8 @@ app.get("/urls", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
     user: users,
-    email: req.cookies['email']
+    email: req.cookies['email'],
+    genid: req.cookies['id']
   };
   res.render("urls_index", templateVars);
 });
