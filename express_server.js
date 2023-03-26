@@ -1,11 +1,14 @@
 const express = require("express");
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session')
 const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080; // default port 8080
 
 app.set('view engine', 'ejs');
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['secret', 'adsfgiuhawef'],
+}))
 
 const urlDatabase = {
 
@@ -37,15 +40,18 @@ app.use(express.urlencoded({ extended: true }));
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const hashedPassword = req.cookies['hashedPassword']
+  const hashedPassword = req.session.hashedPassword
 if (bcrypt.compareSync(password, hashedPassword)) {
   for (const keys in users) {
     if (users[keys].email === email && users[keys].password === password) {
       const id = users[keys].id;
       console.log(users);
-      res.cookie('email', email);
-      res.cookie('hashedPassword', hashedPassword);
-      res.cookie('id', id);
+      req.session.email = email
+      // res.cookie('email', email);
+      req.session.hashedPassword = hashedPassword
+      // res.cookie('hashedPassword', hashedPassword);
+      req.session.id = id
+      // res.cookie('id', id);
       res.redirect("/urls");
     }
   }
@@ -75,10 +81,12 @@ app.post("/registration", (req, res) => {
       email: email,
       password: password
     };
-
-    res.cookie('email', email);
-    res.cookie('hashedPassword', hashedPassword);
-    res.cookie('id', id);
+    req.session.email = email
+    // res.cookie('email', email);
+    req.session.hashedPassword = hashedPassword
+    // res.cookie('hashedPassword', hashedPassword);
+    req.session.id = id
+    // res.cookie('id', id);
     res.redirect("/urls");
   }
 
@@ -89,7 +97,7 @@ app.post("/registration", (req, res) => {
 //with the created url and adds it to home page
 app.post("/urls/new", (req, res) => {
   const longURL = req.body.longURL;
-  const ids = req.cookies['id'];
+  const ids = req.session.id
   if (longURL) {
     const id = generateRandomString();
     urlDatabase[id] = {
@@ -115,8 +123,8 @@ app.post("/urls/:id/edit", (req, res) => {
 
 // logout function
 app.post("/urls", (req, res) => {
-  let email = req.cookies["email"];
-  let password = req.cookies['password'];
+  let email = req.session.email;
+  let password = req.session.password;
   if (email) {
     res.clearCookie('email', email);
     res.clearCookie('password', password);
@@ -135,14 +143,14 @@ app.post("/urls/:id/delete", (req, res) => {
 
 //shows username in create new url header
 app.get("/urls/new", (req, res) => {
-  const email = req.cookies['email'];
+  const email = req.session.email;
   if (!email) {
     res.status(400).send('you need to sign in to create a short url');
   }
   const templateVars = {
     user: users,
     urls: urlDatabase,
-    email: req.cookies['email']
+    email,
   };
   res.render("urls_new", templateVars);
 });
@@ -155,7 +163,7 @@ app.get("/urls/:id", (req, res) => {
     res.status(400).send('url does not exist');
   }
 const urls = urlDatabase;
-const uid = req.cookies['id'];
+const uid = req.session.id
 
 for (key in urls) {
   if (uid !== urls[key].userID) {
@@ -166,7 +174,7 @@ for (key in urls) {
     id,
     urls,
     user: users,
-    email: req.cookies['email'],
+    email: req.session.email,
     genid: uid
   };
   res.render("urls_show", templateVars);
@@ -175,7 +183,7 @@ for (key in urls) {
 
 //shows username in url homepage
 app.get("/urls", (req, res) => {
-  email = req.cookies['email'];
+  email = req.session.email;
   if (!email) {
     res.status(400).send('please login first')
   }
@@ -183,7 +191,7 @@ app.get("/urls", (req, res) => {
     urls: urlDatabase,
     user: users,
     email: email,
-    genid: req.cookies['id']
+    genid: req.session.id
   };
   res.render("urls_index", templateVars);
 });
@@ -193,8 +201,8 @@ app.get("/login", (req, res) => {
   const templateVars = {
     user: users,
     url: urlDatabase,
-    email: req.cookies['email'],
-    password: req.cookies['password']
+    email: req.session.email,
+    password: req.session.password
   };
 
   res.render("urls_login", templateVars);
@@ -206,7 +214,7 @@ app.get("/registration", (req, res) => {
   const templateVars = {
     user: users,
     url: urlDatabase,
-    email: req.cookies['email']
+    email: req.session.email
   };
   res.render("urls_register", templateVars);
 });
