@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieSession = require('cookie-session')
+const {getUserByEmail} = require('./helper')
 const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080; // default port 8080
@@ -27,6 +28,7 @@ const generateRandomString = function() {
   return output;
 };
 
+
 app.use(express.urlencoded({ extended: true }));
 
 
@@ -41,7 +43,8 @@ app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const hashedPassword = req.session.hashedPassword
-if (bcrypt.compareSync(password, hashedPassword)) {
+  const uid = getUserByEmail(email, users)
+if (uid && bcrypt.compareSync(password, hashedPassword)) {
   for (const keys in users) {
     if (users[keys].email === email && users[keys].password === password) {
       const id = users[keys].id;
@@ -126,8 +129,10 @@ app.post("/urls", (req, res) => {
   let email = req.session.email;
   let password = req.session.password;
   if (email) {
-    res.clearCookie('email', email);
-    res.clearCookie('password', password);
+    req.session.email = undefined;
+    // res.clearCookie('email', email);
+    req.session.password = undefined;
+    // res.clearCookie('password', password);
     res.redirect("/login");
   }
 });
