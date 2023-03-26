@@ -16,11 +16,13 @@
     <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
-        <h5 class="card-title">TinyURL for: <%= longURL %></h5>
+        <% for (key in urls) { %>
+          <% if (key === id) { %>
+        <h5 class="card-title">TinyURL for: <%= urls[key].longURL %></h5>
         <p class="card-text">
           Short URL ID: <a href="/u/<%= id %>"><%= id %></a>
+          <% } %>
         </p>
-      
       </div>
       <div class="card-footer text-muted">
         <form method="POST" action="/urls/<%= id %>/edit">Edit
@@ -36,7 +38,7 @@
               <button type="submit" class=" btn btn-primary">Submit</button>
             </div>
         </form>
-        
+
         
       </div>
       

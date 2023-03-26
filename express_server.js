@@ -1,5 +1,6 @@
 const express = require("express");
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
+const e = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -15,13 +16,13 @@ const users = {
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
 
 
-function generateRandomString() {
-  let output = ''
-for (let i = 0; i < 6; i++) {
-output += characters.charAt(Math.floor(Math.random() * characters.length))
-}
-return output;
-}
+const generateRandomString = function() {
+  let output = '';
+  for (let i = 0; i < 6; i++) {
+    output += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return output;
+};
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -34,64 +35,63 @@ app.use(express.urlencoded({ extended: true }));
 
 //login page
 app.post('/login', (req, res) => {
-  const email = req.body.email
-  const password = req.body.password
+  const email = req.body.email;
+  const password = req.body.password;
 
-    for (const keys in users) {
-      if (users[keys].email === email && users[keys].password === password) {
-        const id = users[keys].id
-        console.log(users)
-        res.cookie('email', email);
-        res.cookie('password', password);
-        res.cookie('id', id);
-        res.redirect("/urls");
-      } 
+  for (const keys in users) {
+    if (users[keys].email === email && users[keys].password === password) {
+      const id = users[keys].id;
+      console.log(users);
+      res.cookie('email', email);
+      res.cookie('password', password);
+      res.cookie('id', id);
+      res.redirect("/urls");
+    }
+  }
+  res.status(403).send('Error, wrong information provided');
+});
+  
+  
+//registration page
+app.post("/registration", (req, res) => {
+  let id = generateRandomString();
+  const email = req.body.email;
+  const password = req.body.password;
+  for (const keys in users) {
+    for (const key in users[keys]) {
+      if (users[keys][key] === email) {
+        res.status(400).send('Error, Email already taken');
       }
-      res.status(403).send('Error, wrong information provided')
-  });
-  
-  
-  //registration page
-  app.post("/registration", (req, res) => {
-    let id = generateRandomString();
-    const email = req.body.email;
-    const password = req.body.password;
-    for (const keys in users) {
-      for (const key in users[keys]) {
-  if (users[keys][key] === email) {
-    res.status(400).send('Error, Email already taken')
-  }
     }
   }
-    if (!email || !password) {
-      res.status(400).send('Error, insufficient information provided')
-    }
-    else if (email && password) {
-  users[id] = {
-  id,
-  email: email,
-  password: password
+  if (!email || !password) {
+    res.status(400).send('Error, insufficient information provided');
+  } else if (email && password) {
+    users[id] = {
+      id,
+      email: email,
+      password: password
+    };
+
+    res.cookie('email', email);
+    res.cookie('password', password);
+    res.cookie('id', id);
+    res.redirect("/urls");
   }
 
-  res.cookie('email', email);
-  res.cookie('password', password);
-  res.cookie('id', id);
-  res.redirect("/urls");
-  }
-
-  });
+});
 
 
-//generates a random short url to associate 
+//generates a random short url to associate
 //with the created url and adds it to home page
 app.post("/urls/new", (req, res) => {
   const longURL = req.body.longURL;
-  ids = req.cookies['id']
+  const ids = req.cookies['id'];
   if (longURL) {
     const id = generateRandomString();
-    urlDatabase[id] = { 
+    urlDatabase[id] = {
       longURL: longURL,
-    userID: ids,
+      userID: ids,
     };
     console.log(urlDatabase);
     res.redirect(`/urls`);
@@ -103,8 +103,8 @@ app.post("/urls/new", (req, res) => {
 app.post("/urls/:id/edit", (req, res) => {
   const id = req.params.id;
   const eLongURL = req.body.eLongURL;
-  if (eLongURL){
-  urlDatabase[id] = eLongURL;
+  if (eLongURL) {
+    urlDatabase[id] = eLongURL;
   }
   res.redirect(`/urls/${id}`);
 });
@@ -112,52 +112,59 @@ app.post("/urls/:id/edit", (req, res) => {
 
 // logout function
 app.post("/urls", (req, res) => {
- let email = req.cookies["email"];
- let password = req.cookies['password'];
- let id = req.cookies['id'];
- if (email) {
-  res.clearCookie('email', email);
-  res.clearCookie('password', password);
-  res.redirect("/login");
- }
+  let email = req.cookies["email"];
+  let password = req.cookies['password'];
+  if (email) {
+    res.clearCookie('email', email);
+    res.clearCookie('password', password);
+    res.redirect("/login");
+  }
 });
 
 
 //lets user delete a url from the home page
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
-delete urlDatabase[id];
-res.redirect("/urls");
+  delete urlDatabase[id];
+  res.redirect("/urls");
 });
 
 
 //shows username in create new url header
 app.get("/urls/new", (req, res) => {
-  const email = req.cookies['email']
+  const email = req.cookies['email'];
   if (!email) {
-res.status(400).send('you need to sign in to create a short url')
+    res.status(400).send('you need to sign in to create a short url');
   }
   const templateVars = {
     user: users,
     urls: urlDatabase,
     email: req.cookies['email']
-  }
+  };
   res.render("urls_new", templateVars);
 });
 
 
 //shows username in header while in edit url
 app.get("/urls/:id", (req, res) => {
-  id = req.params.id
-    if (!urlDatabase[id]) {
-      res.status(400).send('url does not exist');
+  const id = req.params.id;
+  if (!urlDatabase[id]) {
+    res.status(400).send('url does not exist');
   }
+const urls = urlDatabase;
+const uid = req.cookies['id'];
 
-  const templateVars = { 
-    id: req.params.id, 
-    longURL: urlDatabase[req.params.id],
+for (key in urls) {
+  if (uid !== urls[key].userID) {
+    res.redirect('/urls')
+  }
+}
+  const templateVars = {
+    id,
+    urls,
     user: users,
-    email: req.cookies['email']
+    email: req.cookies['email'],
+    genid: uid
   };
   res.render("urls_show", templateVars);
 });
@@ -165,10 +172,14 @@ app.get("/urls/:id", (req, res) => {
 
 //shows username in url homepage
 app.get("/urls", (req, res) => {
+  email = req.cookies['email'];
+  if (!email) {
+    res.status(400).send('please login first')
+  }
   const templateVars = {
     urls: urlDatabase,
     user: users,
-    email: req.cookies['email'],
+    email: email,
     genid: req.cookies['id']
   };
   res.render("urls_index", templateVars);
@@ -176,32 +187,32 @@ app.get("/urls", (req, res) => {
 
 
 app.get("/login", (req, res) => {
-const templateVars = {
+  const templateVars = {
     user: users,
     url: urlDatabase,
     email: req.cookies['email'],
     password: req.cookies['password']
-};
+  };
 
-  res.render("urls_login", templateVars)
+  res.render("urls_login", templateVars);
 });
 
 
 //gives user registration page
 app.get("/registration", (req, res) => {
   const templateVars = {
-  user: users,
-  url: urlDatabase,
-  email: req.cookies['email']
-};
-  res.render("urls_register", templateVars)
+    user: users,
+    url: urlDatabase,
+    email: req.cookies['email']
+  };
+  res.render("urls_register", templateVars);
 });
 
 
 //redirects user to selected url
 app.get("/u/:id", (req, res) => {
-  const url = req.params.id
-   const longURL = urlDatabase[url];
+  const url = req.params.id;
+  const longURL = urlDatabase[url];
   res.redirect(longURL);
 });
 
@@ -215,17 +226,17 @@ app.get("/", (req, res) => {
 
 //test function
 app.get("/urls.json", (req, res) => {
-    res.json(urlDatabase);
-  });
+  res.json(urlDatabase);
+});
 
 
 
 
   
-  app.get("/hello", (req, res) => {
-    res.send("<html><body>Hello <b>World</b></body></html>\n");
-  });
+app.get("/hello", (req, res) => {
+  res.send("<html><body>Hello <b>World</b></body></html>\n");
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
-}); 
+});
