@@ -120,6 +120,10 @@ res.redirect("/urls");
 
 //shows username in create new url header
 app.get("/urls/new", (req, res) => {
+  const email = req.cookies['email']
+  if (!email) {
+res.status(400).send('you need to sign in to create a short url')
+  }
   const templateVars = {
     user: users,
     urls: urlDatabase,
@@ -131,6 +135,11 @@ app.get("/urls/new", (req, res) => {
 
 //shows username in header while in edit url
 app.get("/urls/:id", (req, res) => {
+  id = req.params.id
+    if (!urlDatabase[id]) {
+      res.status(400).send('url does not exist');
+  }
+
   const templateVars = { 
     id: req.params.id, 
     longURL: urlDatabase[req.params.id],
