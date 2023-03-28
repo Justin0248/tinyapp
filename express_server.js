@@ -1,9 +1,12 @@
 const express = require("express");
 const cookieSession = require('cookie-session');
-const {getUserByEmail} = require('./helper');
+const { generateRandomString ,getUserByEmail } = require('./database/functions');
+const { urlDatabase, users} = require('./database/data');
 const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080; // default port 8080
+
+
 
 app.set('view engine', 'ejs');
 app.use(cookieSession({
@@ -11,27 +14,7 @@ app.use(cookieSession({
   keys: ['secret', 'adsfgiuhawef'],
 }));
 
-const urlDatabase = {
-
-};
-const users = {
-};
-
-const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
-
-
-const generateRandomString = function() {
-  let output = '';
-  for (let i = 0; i < 6; i++) {
-    output += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return output;
-};
-
-
 app.use(express.urlencoded({ extended: true }));
-
-
 
 
 
@@ -52,10 +35,12 @@ app.post('/login', (req, res) => {
         req.session.hashedPassword = hashedPassword;
         req.session.id = id;
         res.redirect("/urls");
+        return 0;
       }
     }
   }
   res.status(403).send('Error, wrong information provided');
+  return 0;
 });
   
   
@@ -68,6 +53,7 @@ app.post("/registration", (req, res) => {
     for (const key in users[keys]) {
       if (users[keys][key] === email) {
         res.status(400).send('Error, Email already taken');
+        return 0;
       }
     }
   }
@@ -86,7 +72,6 @@ app.post("/registration", (req, res) => {
     // res.cookie('id', id);
     res.redirect("/urls");
   }
-
 });
 
 
@@ -101,18 +86,17 @@ app.post("/urls/new", (req, res) => {
       longURL: longURL,
       userID: ids,
     };
-    res.redirect(`/urls`);
+    res.redirect(`/urls/${id}`);
   }
 });
 
 
 //lets user edit a long url without changing the short url
-app.post("/urls/:id/edit", (req, res) => {
+app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
   const eLongURL = req.body.eLongURL;
-  if (eLongURL) {
-    urlDatabase[id] = eLongURL;
-  }
+    urlDatabase[id].longURL = eLongURL;
+
   res.redirect(`/urls/${id}`);
 });
 
@@ -149,6 +133,7 @@ app.get("/urls/new", (req, res) => {
   const email = req.session.email;
   if (!email) {
     res.status(400).send('you need to sign in to create a short url');
+    return 0;
   }
   const templateVars = {
     user: users,
@@ -164,6 +149,7 @@ app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
   if (!urlDatabase[id]) {
     res.status(400).send('url does not exist');
+    return 0;
   }
   const urls = urlDatabase;
   const uid = req.session.id;
@@ -188,6 +174,7 @@ app.get("/urls", (req, res) => {
   email = req.session.email;
   if (!email) {
     res.status(400).send('please login first');
+    return 0;
   }
   const templateVars = {
     urls: urlDatabase,
@@ -236,22 +223,4 @@ app.listen(PORT, () => {
 });
 
 
-
-
-
-//test function
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
-//test function
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-
-//test function
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
 
