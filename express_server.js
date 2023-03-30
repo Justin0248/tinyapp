@@ -133,8 +133,8 @@ app.post("/urls/:id/delete", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const email = req.session.email;
   if (!email) {
-    res.status(400).send('you need to sign in to create a short url');
-    return 0;
+ res.redirect('/login');
+ return;
   }
   const templateVars = {
     user: users,
