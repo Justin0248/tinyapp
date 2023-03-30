@@ -116,13 +116,13 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   const uid = req.session.id;
   const urls = urlDatabase;
+  const id = req.params.id;
   for (key in urls) {
     if (uid !== urls[key].userID && key === id) {
       res.status(400).send('you do not have permissions to access this information, please login with the associated account')
       return 0;
     }
   }
-  const id = req.params.id;
   delete urlDatabase[id];
   res.redirect("/urls");
   return 0;
