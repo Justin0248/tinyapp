@@ -120,8 +120,8 @@ app.post("/urls/:id/delete", (req, res) => {
   const uid = req.session.id;
   const urls = urlDatabase;
   for (key in urls) {
-    if (uid !== urls[key].userID) {
-      res.redirect('/urls');
+    if (uid !== urls[key].userID && key === id) {
+      res.status(400).send('you do not have permissions to access this information, please login with the associated account')
       return 0;
     }
   }
@@ -159,8 +159,8 @@ app.get("/urls/:id", (req, res) => {
   const uid = req.session.id;
 
   for (key in urls) {
-    if (uid !== urls[key].userID) {
-      res.redirect('/urls');
+    if (uid !== urls[key].userID && key === id) {
+      res.status(400).send('you do not have permissions to access this information, please login with the associated account')
     }
   }
   const templateVars = {
