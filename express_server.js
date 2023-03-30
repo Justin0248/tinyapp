@@ -25,14 +25,13 @@ app.use(express.urlencoded({ extended: true }));
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const hashedPassword = req.session.hashedPassword;
   const uid = getUserByEmail(email, users);
-  if (uid && bcrypt.compareSync(password, hashedPassword)) {
-    for (const keys in users) {
-      if (users[keys].email === email && users[keys].password === password) {
+  for (const keys in users) {
+    if (users[keys].email === email) {
+  if (uid && bcrypt.compareSync(password, users[uid].hashedPassword)) {
         const id = users[keys].id;
         req.session.email = email;
-        req.session.hashedPassword = hashedPassword;
+        req.session.hashedPassword = users[uid].hashedPassword;
         req.session.id = id;
         res.redirect("/urls");
         return 0;
@@ -42,7 +41,6 @@ app.post('/login', (req, res) => {
   res.status(403).send('Error, wrong information provided');
   return 0;
 });
-  
   
 //registration function
 app.post("/registration", (req, res) => {
@@ -64,7 +62,7 @@ app.post("/registration", (req, res) => {
     users[id] = {
       id,
       email: email,
-      password: password
+      hashedPassword: hashedPassword
     };
     req.session.email = email;
     req.session.hashedPassword = hashedPassword;
@@ -107,8 +105,7 @@ app.post("/urls", (req, res) => {
   let email = req.session.email;
   let password = req.session.password;
   if (email) {
-    req.session.email = undefined;
-    req.session.password = undefined;
+    req.session = null;
     res.redirect("/login");
     return 0;
   }
