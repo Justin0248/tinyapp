@@ -11,7 +11,7 @@ const PORT = 8080; // default port 8080
 app.set('view engine', 'ejs');
 app.use(cookieSession({
   name: 'session',
-  keys: ['secret', 'adsfgiuhawef'],
+  keys: ['secret'],
 }));
 
 app.use(express.urlencoded({ extended: true }));
@@ -69,7 +69,6 @@ app.post("/registration", (req, res) => {
     req.session.email = email;
     req.session.hashedPassword = hashedPassword;
     req.session.id = id;
-    // res.cookie('id', id);
     res.redirect("/urls");
   }
 });
@@ -92,11 +91,13 @@ app.post("/urls/new", (req, res) => {
 
 
 //lets user edit a long url without changing the short url
-app.post("/urls/:id", (req, res) => {
+app.post("/urls/:id/edit", (req, res) => {
   const id = req.params.id;
+  const longURL = req.params.longURL
   const eLongURL = req.body.eLongURL;
+  if (eLongURL) {
     urlDatabase[id].longURL = eLongURL;
-
+  }
   res.redirect(`/urls/${id}`);
 });
 
@@ -109,6 +110,7 @@ app.post("/urls", (req, res) => {
     req.session.email = undefined;
     req.session.password = undefined;
     res.redirect("/login");
+    return 0;
   }
 });
 
@@ -120,11 +122,13 @@ app.post("/urls/:id/delete", (req, res) => {
   for (key in urls) {
     if (uid !== urls[key].userID) {
       res.redirect('/urls');
+      return 0;
     }
   }
   const id = req.params.id;
   delete urlDatabase[id];
   res.redirect("/urls");
+  return 0;
 });
 
 
@@ -153,13 +157,14 @@ app.get("/urls/:id", (req, res) => {
   }
   const urls = urlDatabase;
   const uid = req.session.id;
+
   for (key in urls) {
     if (uid !== urls[key].userID) {
       res.redirect('/urls');
     }
   }
   const templateVars = {
-    id,
+    id: id,
     urls,
     user: users,
     email: req.session.email,
@@ -212,9 +217,11 @@ app.get("/registration", (req, res) => {
 
 //redirects user to selected url
 app.get("/u/:id", (req, res) => {
-  const url = req.params.id;
-  const longURL = urlDatabase[url];
-  res.redirect(longURL);
+  const id = req.params.id;
+  const longURL = urlDatabase[id];
+  if(id) {
+  res.redirect(urlDatabase[id].longURL);
+  }
 });
 
 
